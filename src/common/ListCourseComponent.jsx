@@ -59,7 +59,6 @@ const ListCourseComponent = () => {
     } else {
       setError("An unexpected error occurred. Please try again.");
     }
-    console.error("Error fetching courses:", error);
   };
 
   const handleSearchClick = (course) => {
@@ -168,8 +167,8 @@ const ListCourseComponent = () => {
             className={`col-span-${3} border border-gray-300 p-2 text-center text-gradient-red font-bold text-2xl mt-10`}
           >
             {isAdmin
-              ? "No courses instance available. Please create course instance."
-              : "No courses instance available. Please ask an admin or create an admin using the REST API to create course instance, then log in again."}
+              ? "No courses  available. Please create course ."
+              : "No courses  available. Please ask an admin or create an admin using the REST API to create course , then log in again."}
           </div>
         )}
       </div>

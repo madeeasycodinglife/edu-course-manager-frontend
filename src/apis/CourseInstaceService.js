@@ -38,10 +38,6 @@ export const getInstancesByYearAndSemester = async (
     const response = await axios.get(`${API_URL}/${year}/${semester}`);
     return response.data;
   } catch (error) {
-    console.error(
-      `Error fetching instances for year ${year} and semester ${semester}:`,
-      error
-    );
     throw error;
   }
 };

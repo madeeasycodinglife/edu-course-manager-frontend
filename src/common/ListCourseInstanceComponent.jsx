@@ -5,6 +5,10 @@ import courseService from "../apis/CourseService";
 import { FaSearch, FaTrash } from "react-icons/fa";
 import { TailSpin } from "react-loader-spinner"; // Import a spinner component or use any other spinner
 
+import { ToastContainer, toast } from "react-toastify"; // Import toast and ToastContainer
+import "react-toastify/dist/ReactToastify.css"; // Import the default styles for react-toastify
+import CourseAndInstanceDetailComponent from "./CourseAndInstanceDetailComponent";
+
 const ListCourseInstanceComponent = () => {
   const [courses, setCourses] = useState([]);
   const [filteredCoursesInstances, setFilteredCoursesInstances] = useState([]);
@@ -16,6 +20,8 @@ const ListCourseInstanceComponent = () => {
   const { user, userProfile } = useContext(AuthContext);
   const isAdmin = userProfile?.roles?.includes("ADMIN");
   const [searchPerformed, setSearchPerformed] = useState(false); // State to track if search has been performed
+
+  const [showDetail, setShowDetail] = useState(false);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -72,7 +78,6 @@ const ListCourseInstanceComponent = () => {
     } else {
       setError("An unexpected error occurred.");
     }
-    console.error("Detailed error:", error);
   };
 
   const handleSearch = async () => {
@@ -80,6 +85,7 @@ const ListCourseInstanceComponent = () => {
       setValidationError("Please enter all required fields.");
       return;
     }
+    setError("");
     setValidationError(""); // Clear previous validation errors
     setLoading(true); // Start loading
     setSearchPerformed(true); // Mark search as performed
@@ -130,6 +136,7 @@ const ListCourseInstanceComponent = () => {
       setFilteredCoursesInstances(enrichedInstances);
       setCourses(enrichedInstances);
     } catch (error) {
+      console.log("erorr:", error);
       handleError(error);
       setFilteredCoursesInstances([]);
       setCourses([]);
@@ -138,8 +145,35 @@ const ListCourseInstanceComponent = () => {
     }
   };
 
+  const handleDeleteClick = async (courseId) => {
+    try {
+      if (user && user.accessToken) {
+        setLoading(true); // Set loading to true
+        console.log("courseId:", courseId);
+        await courseService.deleteCourseById(courseId, user.accessToken);
+        toast.success("Course successfully deleted!"); // Show success notification
+      }
+    } catch (error) {
+      handleError(error);
+    } finally {
+      setLoading(false); // Set loading to false
+    }
+  };
+  const handleSearchClick = (courses) => {
+    console.log("courses :", courses);
+    setCourses(courses);
+    setShowDetail(true);
+  };
   const headers = ["Course Title", "Year-Semester", "Course Code", "Action"];
 
+  if (showDetail) {
+    return (
+      <CourseAndInstanceDetailComponent
+        course={courses}
+        onClose={() => setShowDetail(false)}
+      />
+    );
+  }
   return (
     <>
       <div className="header bg-gray-200 text-gray-800 text-xl text-center font-bold p-2">
@@ -233,7 +267,7 @@ const ListCourseInstanceComponent = () => {
                             </span>
                             <span
                               className="text-black rounded-none cursor-pointer"
-                              onClick={() => handleDeleteClick(course.id)}
+                              onClick={() => handleDeleteClick(course.courseId)}
                             >
                               <FaTrash className="text-xl" />
                             </span>
