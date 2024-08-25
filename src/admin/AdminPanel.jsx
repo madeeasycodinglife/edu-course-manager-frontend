@@ -10,24 +10,29 @@ import {
   FaHome,
   FaUser,
 } from "react-icons/fa";
+import Sidebar from "../components/Sidebar"; // Adjust path as needed
 import DashboardComponent from "../common/DashboardComponent";
-// import EditProfileComponent from "../common/EditProfileComponent";
-// import ChangePasswordComponent from "../common/ChangePasswordComponent";
-import LogoutPage from "../auth/LogoutPage";
-import { AuthContext } from "../context/AuthContext";
-import userService from "../apis/UserService";
-import ChangePasswordComponent from "../common/ChangePasswordComponent";
 import EditProfileComponent from "../common/EditProfileComponent";
+import ChangePasswordComponent from "../common/ChangePasswordComponent";
+import LogoutPage from "../auth/LogoutPage";
 import CreateCourseComponent from "./CreateCourseComponent";
 import ListCourseComponent from "../common/ListCourseComponent";
 import ListCourseInstanceComponent from "../common/ListCourseInstanceComponent";
 import CreateInstanceComponent from "./CreateInstanceComponent";
+import { AuthContext } from "../context/AuthContext";
+import userService from "../apis/UserService";
+import AdminSideBar from "./AdminSideBar";
 
 const AdminPanel = () => {
   const [selectedComponent, setSelectedComponent] = useState("dashboard");
   const { user, userProfile, setUserProfile } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(true);
   const [foundUser, setFoundUser] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
   useEffect(() => {
     const validateUserToken = async () => {
@@ -37,7 +42,6 @@ const AdminPanel = () => {
             userProfile.email,
             user.accessToken
           );
-          console.log("response from db by emailID:", response);
           if (response.status === 200) {
             setFoundUser(response.data);
           } else {
@@ -57,7 +61,7 @@ const AdminPanel = () => {
   }, [user, userProfile]);
 
   if (isLoading) {
-    return <div>Loading...</div>; // You can replace this with a loading spinner or component
+    return <div>Loading...</div>;
   }
 
   const renderSelectedComponent = () => {
@@ -84,116 +88,90 @@ const AdminPanel = () => {
   };
 
   return (
-    <>
-      <div className="max-w-full min-h-screen font-serif font-bold mx-auto bg-gradient-to-r from-blue-600 to-blue-400 text-white">
-        <div
-          id="header"
-          className="text-3xl bg-gradient-to-r from-blue-600 to-blue-400 text-white"
-        >
-          <div className="flex justify-between p-3">
-            <h1 className="">Course Manager</h1>
-            <ul className="flex gap-x-7">
-              <li>Home</li>
-              <li>About</li>
-              <li>Services</li>
-              <li>Contact</li>
-            </ul>
-          </div>
+    <div className="max-w-full min-h-screen font-serif font-bold mx-auto bg-gradient-to-r from-blue-600 to-blue-400 text-white">
+      <header className="text-3xl bg-gradient-to-r from-blue-600 to-blue-400 text-white pt-2">
+        <div className="flex justify-between p-3">
+          <h1 className="md:text-2xl text-xl">Admin Panel</h1>
+          <ul className="hidden md:flex gap-x-7 md:text-2xl">
+            <li className="hover:cursor-pointer">Home</li>
+            <li className="hover:cursor-pointer">About</li>
+            <li className="hover:cursor-pointer">Services</li>
+            <li className="hover:cursor-pointer">Contact</li>
+          </ul>
+          <button
+            className="md:hidden text-3xl focus:outline-none"
+            onClick={toggleSidebar}
+          >
+            ☰
+          </button>
         </div>
-        <div id="profile" className="min-h-[10.125rem]">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-8 ml-32">
-              <div className="text-2xl font-serif font-semibold mt-8">
-                <div className="flex items-center gap-5">
-                  <FaUser className="text-xl text-green-900 mt-1" />
-                  <p>{foundUser?.fullName || "No user found"}</p>
-                </div>
-                <div className="flex items-center gap-5">
-                  <FaPhone className="text-xl text-green-900 mt-1" />
-                  <p>+91 {foundUser?.phone || "N/A"}</p>
-                </div>
-                <div className="flex items-center gap-5">
-                  <FaEnvelope className="text-xl text-green-900 mt-1" />
-                  <p>{foundUser?.email || "N/A"}</p>
-                </div>
+        {isSidebarOpen && (
+          <ul className="md:hidden flex flex-col items-center gap-y-2 p-3 absolute left-0 right-0 bg-blue-500 text-white text-2xl">
+            <li onClick={toggleSidebar} className="hover:cursor-pointer">
+              Home
+            </li>
+            <li onClick={toggleSidebar} className="hover:cursor-pointer">
+              About
+            </li>
+            <li onClick={toggleSidebar} className="hover:cursor-pointer">
+              Services
+            </li>
+            <li onClick={toggleSidebar} className="hover:cursor-pointer">
+              Contact
+            </li>
+          </ul>
+        )}
+      </header>
+      <section id="profile" className="min-h-[10.125rem] p-4">
+        <div className="flex flex-col md:flex-row items-center justify-between">
+          <div className="flex flex-col md:flex-row items-center gap-8 md:ml-32">
+            <div className="text-2xl font-serif font-semibold mt-8 text-center md:text-left md:ml-[-5rem]">
+              <div className="flex flex-col md:flex-row items-center gap-5">
+                <p>{foundUser?.fullName || "No user found"}</p>
+              </div>
+              <div className="flex flex-col md:flex-row items-center gap-5">
+                <p>+91 {foundUser?.phone || "N/A"}</p>
+              </div>
+              <div className="flex flex-col md:flex-row items-center gap-5">
+                <p>{foundUser?.email || "N/A"}</p>
               </div>
             </div>
-            <div className="text-xl bg-gradient-to-r from-purple-600 to-purple-400 text-white p-4 rounded-lg animate-pulse">
-              <p>Welcome! We're excited to have you here.</p>
+          </div>
+          {!isSidebarOpen && (
+            <div className="text-xl bg-gradient-to-r from-purple-600 to-purple-400 text-white p-4 rounded-lg animate-pulse mt-4 md:mt-0">
+              <p className="text-center">
+                Welcome! We're excited to have you here.
+              </p>
             </div>
-          </div>
+          )}
+          {isSidebarOpen && (
+            <div className="text-xl bg-gradient-to-r from-purple-600 to-purple-400 text-white p-4 rounded-lg animate-pulse mt-11 md:mt-0">
+              <p className="text-center">
+                Welcome! We're excited to have you here.
+              </p>
+            </div>
+          )}
         </div>
-        {/* main */}
-        <div
-          id="main"
-          className="max-w-screen-xl mx-auto mt-10 min-h-[30.625rem] flex shadow-lg"
+      </section>
+      <main className="max-w-screen-xl mx-auto mt-10 min-h-[30.625rem] flex shadow-lg lg:ml-0">
+        <button
+          className="text-xl ms-3 mt-[-33rem] md:hidden"
+          onClick={toggleSidebar}
         >
-          <div className="flex flex-col shadow-lg w-1/4">
-            <ul className="flex flex-col gap-y-4 text-2xl ml-6 mt-4">
-              <li
-                className="flex items-center gap-2 hover:cursor-pointer"
-                onClick={() => setSelectedComponent("dashboard")}
-              >
-                <FaHome className="text-2xl text-green-900" />
-                <span>Dashboard</span>
-              </li>
-              <li
-                className="flex items-center gap-2 hover:cursor-pointer"
-                onClick={() => setSelectedComponent("createCourse")}
-              >
-                <FaClipboardList className="text-2xl text-green-900" />
-                <span>Create Course</span>
-              </li>
-              <li
-                className="flex items-center gap-2 hover:cursor-pointer"
-                onClick={() => setSelectedComponent("listCourses")}
-              >
-                <FaClipboardList className="text-2xl text-green-900" />
-                <span>List Courses</span>
-              </li>
-              <li
-                className="flex items-center gap-2 hover:cursor-pointer"
-                onClick={() => setSelectedComponent("createInstance")}
-              >
-                <FaClipboardList className="text-2xl text-green-900" />
-                <span>Create Instance</span>
-              </li>
-              <li
-                className="flex items-center gap-2 hover:cursor-pointer"
-                onClick={() => setSelectedComponent("listInstances")}
-              >
-                <FaClipboardList className="text-2xl text-green-900" />
-                <span>List Instances</span>
-              </li>
-              <li
-                className="flex items-center gap-2 hover:cursor-pointer"
-                onClick={() => setSelectedComponent("editProfile")}
-              >
-                <FaUserEdit className="text-2xl text-green-900" />
-                <span>Edit Profile</span>
-              </li>
-              <li
-                className="flex items-center gap-2 hover:cursor-pointer"
-                onClick={() => setSelectedComponent("changePassword")}
-              >
-                <FaLock className="text-2xl text-green-900" />
-                <span>Change Password</span>
-              </li>
-              <li
-                className="flex items-center gap-2 hover:cursor-pointer"
-                onClick={() => setSelectedComponent("logOut")}
-              >
-                <FaSignOutAlt className="text-2xl text-green-900" />
-                <span>Logout</span>
-              </li>
-            </ul>
-          </div>
-          <div className="flex-1 min-h-96 col-span-3">
+          ☰
+        </button>
+        <AdminSideBar
+          isOpen={isSidebarOpen}
+          toggleSidebar={toggleSidebar}
+          setSelectedComponent={setSelectedComponent}
+        />
+        <div className="flex-1 min-h-96 col-span-3 lg:ml-48 overflow-y-auto">
+          <div className="p-4 max-h-[calc(100vh-200px)] overflow-y-auto">
             {renderSelectedComponent()}
           </div>
         </div>
-      </div>
-    </>
+      </main>
+    </div>
   );
 };
 
