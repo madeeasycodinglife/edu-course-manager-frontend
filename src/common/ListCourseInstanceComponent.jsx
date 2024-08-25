@@ -13,8 +13,9 @@ const ListCourseInstanceComponent = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false); // State for loading
   const [validationError, setValidationError] = useState(""); // State for validation errors
-  const { user } = useContext(AuthContext);
-  const isAdmin = user?.roles?.includes("ADMIN");
+  const { user, userProfile } = useContext(AuthContext);
+  const isAdmin = userProfile?.roles?.includes("ADMIN");
+  const [searchPerformed, setSearchPerformed] = useState(false); // State to track if search has been performed
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -81,6 +82,7 @@ const ListCourseInstanceComponent = () => {
     }
     setValidationError(""); // Clear previous validation errors
     setLoading(true); // Start loading
+    setSearchPerformed(true); // Mark search as performed
 
     try {
       // Fetch instances by year and semester
@@ -175,10 +177,94 @@ const ListCourseInstanceComponent = () => {
           </button>
         </div>
         {validationError && (
-          <div className="text-red-500 font-bold mt-2">{validationError}</div>
+          <div className="text-red-500 font-bold text-2xl mt-8">
+            {validationError}
+          </div>
+        )}
+        {!searchPerformed && (
+          <div className="text-center text-2xl mt-24 text-gray-700 p-4">
+            Please enter the year, select a semester, and click search to find
+            the courses you're looking for.
+          </div>
         )}
       </div>
-      {loading ? (
+
+      {searchPerformed && (
+        <>
+          {loading ? (
+            <div className="flex justify-center items-center p-4">
+              <TailSpin color="#000000" height={30} width={30} />
+            </div>
+          ) : (
+            <div className="overflow-x-auto p-4">
+              <div className="grid grid-cols-4 gap-0 p-4">
+                {headers.map((header, index) => (
+                  <div
+                    key={index}
+                    className="border border-gray-300 p-2 text-center bg-gray-200 text-gray-800 font-bold"
+                  >
+                    {header}
+                  </div>
+                ))}
+                {error ? (
+                  <div className="col-span-4 text-center text-red-500 font-bold text-2xl mt-10">
+                    {error}
+                  </div>
+                ) : filteredCoursesInstances.length > 0 ? (
+                  filteredCoursesInstances.map((course) => (
+                    <React.Fragment key={course.id}>
+                      <div className="border border-gray-300 p-2 flex items-center justify-center">
+                        {course.courseTitle}
+                      </div>
+                      <div className="border border-gray-300 p-2 flex items-center justify-center">
+                        {course.year}-{course.semester}
+                      </div>
+                      <div className="border border-gray-300 p-2 flex items-center justify-center">
+                        {course.courseCode}
+                      </div>
+                      <div className="border border-gray-300 p-2 flex items-center justify-center">
+                        {isAdmin ? (
+                          <div className="border border-gray-300 p-2 flex items-center justify-center gap-4">
+                            <span
+                              className="bg-black text-white p-1 mt-1 rounded-none cursor-pointer"
+                              onClick={() => handleSearchClick(course)}
+                            >
+                              <FaSearch className="text-lg" />
+                            </span>
+                            <span
+                              className="text-black rounded-none cursor-pointer"
+                              onClick={() => handleDeleteClick(course.id)}
+                            >
+                              <FaTrash className="text-xl" />
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="border border-gray-300 p-2 flex items-center justify-center gap-4">
+                            <span
+                              className="bg-black text-white p-1 mt-1 rounded-none cursor-pointer"
+                              onClick={() => handleSearchClick(course)}
+                            >
+                              <FaSearch className="text-lg" />
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </React.Fragment>
+                  ))
+                ) : (
+                  <div className="col-span-4 border border-gray-300 p-2 text-center text-red-500 font-bold text-2xl mt-10">
+                    {isAdmin
+                      ? "No courses found."
+                      : "No courses found for this user."}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* {loading ? (
         <div className="flex justify-center items-center p-4">
           <TailSpin color="#000000" height={30} width={30} />
         </div>
@@ -247,7 +333,7 @@ const ListCourseInstanceComponent = () => {
             )}
           </div>
         </div>
-      )}
+      )} */}
     </>
   );
 };
