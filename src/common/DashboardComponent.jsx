@@ -6,9 +6,9 @@ import courseService from "../apis/CourseService";
 const DashboardComponent = () => {
   const [courses, setCourses] = useState([]);
   const [error, setError] = useState(null);
-  const { user } = useContext(AuthContext);
+  const { user, userProfile } = useContext(AuthContext);
   const navigate = useNavigate();
-  const isAdmin = user?.roles?.includes("ADMIN"); // Check if user has 'ADMIN' role
+  const isAdmin = userProfile?.roles?.includes("ADMIN"); // Check if user has 'ADMIN' role
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -56,9 +56,7 @@ const DashboardComponent = () => {
 
   const headers = ["Course Title", "Course Code"];
 
-  const handleTakeExam = (examId) => {
-    navigate(`/take-exam/${examId}`);
-  };
+  console.log("isAdmin:", isAdmin);
 
   return (
     <>
