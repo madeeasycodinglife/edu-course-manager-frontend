@@ -1,10 +1,14 @@
 import React, { useContext, useState } from "react";
 import userService from "../apis/UserService";
 import { AuthContext } from "../context/AuthContext";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 const ChangePasswordComponent = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { user, setUser, userProfile, setUserProfile } =
     useContext(AuthContext);
 
@@ -18,12 +22,20 @@ const ChangePasswordComponent = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validation
+    if (!newPassword || !confirmNewPassword) {
+      setError("Both fields are required.");
+      return;
+    }
+
     if (newPassword !== confirmNewPassword) {
       setError("Passwords do not match. Please try again.");
       return;
     }
 
     try {
+      setIsLoading(true); // Start loading
       const updatedPassword = {
         password: confirmNewPassword,
       };
@@ -47,6 +59,8 @@ const ChangePasswordComponent = () => {
         };
         setUserProfile(localUserProfile);
         setUser(localUser);
+
+        toast.success("Password changed successfully!");
       }
 
       // Reset form fields
@@ -55,11 +69,16 @@ const ChangePasswordComponent = () => {
       setError("");
     } catch (error) {
       console.error("Error updating user profile:", error);
+      const errorMessage = error.response.data.message;
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false); // Stop loading
     }
   };
 
   return (
     <div className="p-4">
+      <ToastContainer />
       <h2 className="header bg-gray-200 text-gray-800 text-xl text-center font-bold p-2">
         Change Password
       </h2>
@@ -88,6 +107,7 @@ const ChangePasswordComponent = () => {
             onChange={handleNewPasswordChange}
             placeholder="New Password"
             className="w-full px-3 py-2 border text-black border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 mb-4"
+            required
           />
           <input
             type="password"
@@ -96,6 +116,7 @@ const ChangePasswordComponent = () => {
             onChange={handleConfirmNewPasswordChange}
             placeholder="Confirm New Password"
             className="w-full px-3 py-2 border text-black border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+            required
           />
         </div>
         <div className="col-span-2 flex justify-end">
@@ -113,8 +134,16 @@ const ChangePasswordComponent = () => {
           <button
             type="submit"
             className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-[#6e9d27] focus:outline-none"
+            disabled={isLoading}
           >
-            Change Password
+            {isLoading ? (
+              <div className="flex items-center">
+                <div className="loader mr-2 border-t-4 border-white border-solid rounded-full w-5 h-5 animate-spin"></div>
+                <span>Changing...</span>
+              </div>
+            ) : (
+              "Change Password"
+            )}
           </button>
         </div>
       </form>

@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
 import userService from "../apis/UserService";
 import { AuthContext } from "../context/AuthContext";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const EditProfileComponent = () => {
   const { user, setUser, userProfile, setUserProfile } =
@@ -8,7 +10,8 @@ const EditProfileComponent = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [error, setError] = useState(null); // State for handling errors
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -27,31 +30,7 @@ const EditProfileComponent = () => {
             setError("Failed to fetch user data. Please try again later.");
           }
         } catch (error) {
-          console.error("Error fetching user data:", error);
-          if (error.response) {
-            const status = error.response.status;
-            if (status === 400) {
-              setError("Bad request. Please check your inputs.");
-            } else if (status === 401) {
-              setError("Unauthorized. Please check your credentials.");
-            } else if (status === 403) {
-              setError("Forbidden. Access denied.");
-            } else if (status === 404) {
-              setError("Resource not found.");
-            } else if (status === 405) {
-              setError("Method not allowed. Please try again later.");
-            } else if (status === 409) {
-              setError("Conflict. User already exists.");
-            } else if (status === 500) {
-              setError("Internal server error. Please try again later.");
-            } else {
-              setError("An error occurred. Please try again later.");
-            }
-          } else if (error.request) {
-            setError("No response received. Please try again later.");
-          } else {
-            setError("An error occurred. Please try again later.");
-          }
+          handleError(error);
         }
       }
     };
@@ -71,20 +50,59 @@ const EditProfileComponent = () => {
     setPhoneNumber(e.target.value);
   };
 
+  const handleError = (error) => {
+    const message = error.response.data.message;
+    if (error.response) {
+      const status = error.response.status;
+      if (status === 400) {
+        setError(message);
+      } else if (status === 401) {
+        setError("Unauthorized. Please check your credentials.");
+      } else if (status === 403) {
+        setError("Forbidden. Access denied.");
+      } else if (status === 404) {
+        setError(message);
+      } else if (status === 409) {
+        setError(message);
+      } else if (status === 500) {
+        setError("Internal server error. Please try again later.");
+      } else {
+        setError(message);
+      }
+    } else if (error.request) {
+      setError("No response received. Please try again later.");
+    } else {
+      setError(message);
+    }
+    toast.error(error.message);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!fullName || !email || !phoneNumber) {
+      toast.error("All fields are required.");
+      return;
+    }
+    if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
+      toast.error("Invalid email format.");
+      return;
+    }
+
+    setLoading(true);
+
     try {
       const updatedUser = {
         fullName,
         email,
         phone: phoneNumber,
       };
-      console.log(user.accessToken, userProfile.email);
+
       const userResponse = await userService.partiallyUpdateUser(
         userProfile.email,
         updatedUser,
         user.accessToken
       );
+
       if (userResponse.status === 200) {
         const localUserProfile = {
           id: userResponse.data.id,
@@ -99,45 +117,27 @@ const EditProfileComponent = () => {
         };
         setUserProfile(localUserProfile);
         setUser(localUser);
-        setError(null); // Clear error state upon successful update
+        setError(null);
+        toast.success("Profile updated successfully!");
       } else {
         setError("Failed to update user profile. Please try again.");
+        toast.error("Failed to update user profile. Please try again.");
       }
     } catch (error) {
-      console.error("Error updating user profile:", error);
-      if (error.response) {
-        const status = error.response.status;
-        if (status === 400) {
-          setError("Bad request. Please check your inputs.");
-        } else if (status === 401) {
-          setError("Unauthorized. Please check your credentials.");
-        } else if (status === 403) {
-          setError("Forbidden. Access denied.");
-        } else if (status === 404) {
-          setError("Resource not found.");
-        } else if (status === 405) {
-          setError("Method not allowed. Please try again later.");
-        } else if (status === 409) {
-          setError("Conflict. User already exists.");
-        } else if (status === 500) {
-          setError("Internal server error. Please try again later.");
-        } else {
-          setError("An error occurred. Please try again later.");
-        }
-      } else if (error.request) {
-        setError("No response received. Please try again later.");
-      } else {
-        setError("An error occurred. Please try again later.");
-      }
+      const errorMessage = error.response.data.message;
+      handleError(error);
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleCancel = () => {
-    // Reset form fields and error state upon cancel
     setFullName("");
     setEmail("");
     setPhoneNumber("");
     setError(null);
+    toast.info("Changes canceled.");
   };
 
   return (
@@ -157,6 +157,7 @@ const EditProfileComponent = () => {
             onChange={handleFullNameChange}
             placeholder="Full Name"
             className="w-full px-3 py-2 border text-black border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+            required
           />
         </div>
         <div className="mb-4 flex items-center">
@@ -170,6 +171,7 @@ const EditProfileComponent = () => {
             onChange={handleEmailChange}
             placeholder="Email"
             className="w-full px-3 py-2 border text-black border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+            required
           />
         </div>
         <div className="mb-4 flex items-center">
@@ -183,10 +185,11 @@ const EditProfileComponent = () => {
             onChange={handlePhoneNumberChange}
             placeholder="Phone"
             className="w-full px-3 py-2 border text-black border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+            required
           />
         </div>
         {error && (
-          <p className="text-center error-text font-bold text-xl mt-2 px-2 ms-[5rem]">
+          <p className="text-center error-text font-bold text-xl mt-2 mb-3 px-2 ms-[5rem]">
             {error}
           </p>
         )}
@@ -195,17 +198,20 @@ const EditProfileComponent = () => {
             type="button"
             className="bg-blue-600 text-white py-2 px-4 rounded-lg mr-2 hover:bg-[#5050c7] focus:outline-none"
             onClick={handleCancel}
+            disabled={loading}
           >
             Cancel
           </button>
           <button
             type="submit"
             className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-[#6e9d27] focus:outline-none"
+            disabled={loading}
           >
-            Save Changes
+            {loading ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </form>
+      <ToastContainer />
     </div>
   );
 };
