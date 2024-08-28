@@ -27,11 +27,11 @@ const ListCourseComponent = () => {
             );
           } else if (error.response.status === 404) {
             setError(
-              "Sorry, we couldn't find the exam you were looking for. Please contact support for assistance."
+              "Sorry, we couldn't find the course you were looking for. Please contact support for assistance."
             );
           } else {
             setError(
-              "An error occurred while fetching exams. Please try again."
+              "An error occurred while fetching courses. Please try again."
             );
           }
         } else if (error.request) {
@@ -43,7 +43,7 @@ const ListCourseComponent = () => {
           // Something happened in setting up the request that triggered an Error
           setError("An unexpected error occurred. Please try again.");
         }
-        console.error("Error fetching exams:", error);
+        console.error("Error fetching courses:", error);
       }
     };
 
