@@ -13,6 +13,11 @@ RUN npm install
 # Copy the rest of your application code to the working directory
 COPY . .
 
+# Ensure the public directory is copied (if it contains static assets like images)
+# Vite automatically serves this directory at the root of your app
+
+COPY public ./public
+
 # Build the React app
 RUN npm run build
 
