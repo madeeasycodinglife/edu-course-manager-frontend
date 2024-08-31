@@ -3,16 +3,16 @@ import { AuthContext } from "../context/AuthContext";
 import courseService from "../apis/CourseService";
 import { FaSearch, FaTrash } from "react-icons/fa";
 import CourseDetailComponent from "./CourseDetailComponent";
-import { ToastContainer, toast } from "react-toastify"; // Import toast and ToastContainer
-import "react-toastify/dist/ReactToastify.css"; // Import the default styles for react-toastify
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ListCourseComponent = () => {
-  const [courses, setCourses] = useState([]);
+  const [courses, setCourses] = useState([]); // Initialize as an empty array
   const [error, setError] = useState(null);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(false); // State to manage loading
+  const [loading, setLoading] = useState(false);
 
   const { user, userProfile } = useContext(AuthContext);
 
@@ -27,14 +27,20 @@ const ListCourseComponent = () => {
     const fetchCourses = async () => {
       try {
         if (user && user.accessToken) {
-          setLoading(true); // Set loading to true
+          setLoading(true);
           const response = await courseService.getAllCourses(user.accessToken);
-          setCourses(response);
+          if (Array.isArray(response)) {
+            setCourses(response);
+          } else {
+            setCourses([]); // Ensure courses is an array even if the response is not what you expect
+            setError("Service is currently unavailable !!");
+          }
         }
       } catch (error) {
         handleError(error);
+        setCourses([]); // Set courses to an empty array in case of an error
       } finally {
-        setLoading(false); // Set loading to false
+        setLoading(false);
       }
     };
 
@@ -69,16 +75,15 @@ const ListCourseComponent = () => {
   const handleDeleteClick = async (courseId) => {
     try {
       if (user && user.accessToken) {
-        setLoading(true); // Set loading to true
-        console.log("courseId:", courseId);
+        setLoading(true);
         await courseService.deleteCourseById(courseId, user.accessToken);
         setCourses(courses.filter((course) => course.id !== courseId));
-        toast.success("Course successfully deleted!"); // Show success notification
+        toast.success("Course successfully deleted!");
       }
     } catch (error) {
       handleError(error);
     } finally {
-      setLoading(false); // Set loading to false
+      setLoading(false);
     }
   };
 
@@ -99,7 +104,7 @@ const ListCourseComponent = () => {
 
   return (
     <>
-      <ToastContainer /> {/* Add ToastContainer to your component */}
+      <ToastContainer />
       <div className="header bg-gray-200 text-gray-800 text-xl text-center font-bold p-2">
         List of Courses
       </div>
@@ -167,8 +172,8 @@ const ListCourseComponent = () => {
             className={`col-span-${3} border border-gray-300 p-2 text-center text-gradient-red font-bold text-2xl mt-10`}
           >
             {isAdmin
-              ? "No courses  available. Please create course ."
-              : "No courses  available. Please ask an admin or create an admin using the REST API to create course , then log in again."}
+              ? "No courses available. Please create a course."
+              : "No courses available. Please ask an admin or create an admin using the REST API to create a course, then log in again."}
           </div>
         )}
       </div>
