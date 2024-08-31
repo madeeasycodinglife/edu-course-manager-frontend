@@ -58,7 +58,7 @@ const Login = () => {
         const status = error.response.status;
 
         if (status === 401 || status === 403) {
-          setError("Unauthorized access or Forbidden");
+          setError("Invalid email or password.");
         } else if (status === 404) {
           setError("User not found");
         } else if (status === 405) {

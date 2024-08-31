@@ -69,7 +69,8 @@ const Register = () => {
         } else if (status === 405) {
           setError("Method not allowed. Please try again later.");
         } else if (status === 409) {
-          setError("Conflict. User already exists.");
+          console.log("error conflict :", error);
+          setError(error.response.data.message);
         } else if (status === 500) {
           setError("Internal server error. Please try again later.");
         } else {

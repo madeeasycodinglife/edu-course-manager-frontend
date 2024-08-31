@@ -68,9 +68,9 @@ const CreateInstanceComponent = () => {
         } else if (status === 409) {
           setError(errorMessage);
           toast.error(errorMessage);
-        } else if (status >= 500) {
-          setError(errorMessage);
-          toast.error(errorMessage);
+        } else if (status === 503) {
+          setError("Sorry !! Service Is Unavailable.");
+          toast.error("Sorry !! Service Is Unavailable.");
         } else {
           setError(errorMessage);
           toast.error(errorMessage);

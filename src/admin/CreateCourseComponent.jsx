@@ -38,9 +38,9 @@ const CreateCourseComponent = () => {
       setError(null);
     } catch (error) {
       console.error("Error creating Course:", error);
-      if (error.statusCode === 503) {
-        setError(error.message);
-        toast.error(error.message);
+      if (error.response.status === 503) {
+        setError(error.response.data);
+        toast.error(error.response.data);
       }
       if (error.response) {
         const status = error.response.status;
@@ -66,8 +66,8 @@ const CreateCourseComponent = () => {
         } else if (status === 409) {
           setError(errorMessage);
           toast.error(errorMessage);
-        } else if (status >= 500) {
-          setError(errorMessage);
+        } else if (status === 503) {
+          setError("Course Service Is not Available.");
           toast.error(errorMessage);
         } else {
           setError(errorMessage);
