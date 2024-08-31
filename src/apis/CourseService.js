@@ -10,6 +10,15 @@ export const createCourse = async (course, accessToken) => {
         Authorization: `Bearer ${accessToken}`,
       },
     });
+    console.log(response);
+    if (
+      response.data ===
+      "The Course Service is currently unavailable. Please try again later. If the problem persists, please contact our support team at support@madeeasy.com."
+    ) {
+      const error = new Error("The Course Service is currently unavailable !!");
+      error.statusCode = 503;
+      throw error;
+    }
     return response.data;
   } catch (error) {
     console.error("Error creating course:", error);

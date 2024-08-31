@@ -43,7 +43,7 @@ const CreateInstanceComponent = () => {
         setError(error.message);
         toast.error(error.message);
       }
-
+      console.log("data:", error.response);
       if (error.response) {
         const status = error.response.status;
         const errorMessage = error.response.data.message;
@@ -51,8 +51,8 @@ const CreateInstanceComponent = () => {
         const errorResponse = error.response.data;
         console.log("errorResponse :", errorResponse);
         if (status === 400) {
-          setError(errorMessage ? errorMessage : errorResponse.semester);
-          toast.error(errorMessage ? errorMessage : errorResponse.semester);
+          setError(error.message ? error.message : errorResponse.semester);
+          toast.error(error.message ? error.message : errorResponse.semester);
         } else if (status === 401) {
           setError(errorMessage);
           toast.error(errorMessage);
@@ -115,6 +115,9 @@ const CreateInstanceComponent = () => {
             name="year"
             value={instance.year}
             onChange={handleChange}
+            onInput={(e) =>
+              (e.target.value = e.target.value.replace(/[^0-9]/g, ""))
+            }
             placeholder="Year"
             className="w-full px-3 py-2 border text-black border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
             required
@@ -130,6 +133,9 @@ const CreateInstanceComponent = () => {
             name="semester"
             value={instance.semester}
             onChange={handleChange}
+            onInput={(e) =>
+              (e.target.value = e.target.value.replace(/[^0-9]/g, ""))
+            }
             placeholder="Semester"
             className="w-full px-3 py-2 border text-black border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
             required
@@ -144,6 +150,9 @@ const CreateInstanceComponent = () => {
             name="courseId"
             value={instance.courseId}
             onChange={handleChange}
+            onInput={(e) =>
+              (e.target.value = e.target.value.replace(/[^0-9]/g, ""))
+            }
             placeholder="Course ID"
             className="w-full px-3 py-2 border text-black border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
             required

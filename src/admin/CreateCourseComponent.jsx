@@ -37,8 +37,11 @@ const CreateCourseComponent = () => {
       });
       setError(null);
     } catch (error) {
-      console.error("Error creating exam:", error);
-
+      console.error("Error creating Course:", error);
+      if (error.statusCode === 503) {
+        setError(error.message);
+        toast.error(error.message);
+      }
       if (error.response) {
         const status = error.response.status;
         const errorMessage = error.response.data.message;

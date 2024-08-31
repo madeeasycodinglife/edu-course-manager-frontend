@@ -13,6 +13,7 @@ export const createInstance = async (instance, accessToken) => {
       },
     });
 
+    console.log("response:", response);
     if (
       response.data ===
       "The Instance Service is currently unavailable. Please try again later. If you need immediate help, please contact support at support@madeeasy.com."
@@ -23,27 +24,10 @@ export const createInstance = async (instance, accessToken) => {
       error.statusCode = 503;
       throw error;
     }
-
     return response.data;
   } catch (error) {
-    if (error.response) {
-      // If the error is from the server and has a status code
-      const serverError = new Error(
-        error.response.data.message || "Server error"
-      );
-      serverError.statusCode = error.response.status;
-      throw serverError;
-    } else if (error.request) {
-      // If the request was made but no response was received
-      const requestError = new Error("No response received from the server");
-      requestError.statusCode = 503;
-      throw requestError;
-    } else {
-      // If the error was thrown during the request setup
-      const generalError = new Error(error.message);
-      generalError.statusCode = error.statusCode || 500;
-      throw generalError;
-    }
+    console.error("Error creating course instance:", error);
+    throw error;
   }
 };
 

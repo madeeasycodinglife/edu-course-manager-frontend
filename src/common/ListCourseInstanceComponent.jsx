@@ -151,6 +151,7 @@ const ListCourseInstanceComponent = () => {
         setLoading(true); // Set loading to true
         console.log("courseId:", courseId);
         await courseService.deleteCourseById(courseId, user.accessToken);
+        setFilteredCoursesInstances([]);
         toast.success("Course successfully deleted!"); // Show success notification
       }
     } catch (error) {
