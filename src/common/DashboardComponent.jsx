@@ -20,9 +20,9 @@ const DashboardComponent = () => {
         if (Array.isArray(response)) {
           setCourses(response);
         } else {
-          console.warn("Unexpected data format:", response);
+          console.warn("Course Service is not available !!.");
           setCourses([]);
-          setError("Unexpected data format received from the server.");
+          setError("Course Service is not available !!.");
         }
       } catch (error) {
         handleError(error);
