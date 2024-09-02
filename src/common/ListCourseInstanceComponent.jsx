@@ -178,7 +178,7 @@ const ListCourseInstanceComponent = () => {
   return (
     <>
       <div className="header bg-gray-200 text-gray-800 text-xl text-center font-bold p-2">
-        List of Courses
+        List of Instances
       </div>
       <div className="flex flex-col items-center p-4">
         <div className="flex">
